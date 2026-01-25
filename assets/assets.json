@@ -29,6 +29,27 @@
 			"https://cdn.statically.io/gh/uBlockOrigin/uAssetsCDN/main/filters/badlists.txt"
 		]
 	},
+	"helium-annoyances": {
+		"content": "filters",
+		"group": "default",
+		"parent": "Helium filters",
+		"title": "Helium filters – Annoyances",
+		"tags": "annoyances",
+		"contentURL": [
+			"https://raw.githubusercontent.com/imputnet/helium-services/main/filters/helium-annoyances.txt",
+			"assets/helium/annoyances.txt"
+		]
+	},
+	"helium-unbreak": {
+		"content": "filters",
+		"group": "default",
+		"parent": "Helium filters",
+		"title": "Helium filters – Unbreak",
+		"contentURL": [
+			"https://raw.githubusercontent.com/imputnet/helium-services/main/filters/helium-unbreak.txt",
+			"assets/helium/unbreak.txt"
+		]
+	},
 	"ublock-filters": {
 		"content": "filters",
 		"group": "default",

@@ -24,6 +24,7 @@ mkdir $DES/thirdparties
 
 ASSETS_MAIN=dist/build/uAssets/main
 ASSETS_PROD=dist/build/uAssets/prod
+ASSETS_HELIUM=dist/build/uAssets/hs
 
 cp -R $ASSETS_MAIN/thirdparties/pgl.yoyo.org     $DES/thirdparties/
 cp -R $ASSETS_MAIN/thirdparties/publicsuffix.org $DES/thirdparties/
@@ -40,3 +41,7 @@ cp $ASSETS_PROD/filters/filters.min.txt $DES/ublock/filters.min.txt
 cp $ASSETS_PROD/filters/privacy.min.txt $DES/ublock/privacy.min.txt
 cp $ASSETS_PROD/filters/quick-fixes.min.txt $DES/ublock/quick-fixes.min.txt
 cp $ASSETS_PROD/filters/unbreak.min.txt $DES/ublock/unbreak.min.txt
+
+mkdir $DES/helium
+cp $ASSETS_HELIUM/filters/helium-annoyances.txt $DES/helium/annoyances.txt
+cp $ASSETS_HELIUM/filters/helium-unbreak.txt $DES/helium/unbreak.txt

@@ -9,3 +9,4 @@ DES=dist/build/uAssets
 echo "*** Pull assets from remote into $DES"
 git clone --depth 1 --branch master https://github.com/uBlockOrigin/uAssets $DES/main
 git clone --depth 1 --branch gh-pages https://github.com/uBlockOrigin/uAssets $DES/prod
+git clone --depth 1 --branch main https://github.com/imputnet/helium-services.git $DES/hs
