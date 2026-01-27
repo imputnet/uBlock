@@ -28,5 +28,5 @@ import { dom } from './dom.js';
         what: 'getAppData',
     });
 
-    dom.text('#aboutNameVer', appData.name + ' ' + appData.version);
+    dom.text('#aboutNameVer', `${appData.name} ${appData.version} (Helium)`);
 })();
