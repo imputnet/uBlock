@@ -427,6 +427,14 @@ try {
         µb.loadLocalSettings(),
     ]);
 
+    // Ensure default-list migrations are not missed on upgrade
+    // when assets.json was updated earlier.
+    // TODO: remove bootstrapping when majority of existing users
+    //       have updated past 1.69.0.
+    const bootstrapDefaults = lastVersionInt !== 0 &&
+        lastVersionInt < vAPI.app.intFromVersion('1.69.0');
+    await µb.reconcileDefaultListset(bootstrapDefaults);
+
     // https://github.com/uBlockOrigin/uBlock-issues/issues/1547
     if ( lastVersionInt === 0 && vAPI.webextFlavor.soup.has('chromium') ) {
         vAPI.app.restart();

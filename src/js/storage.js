@@ -481,6 +481,113 @@ onBroadcast(msg => {
 
 /******************************************************************************/
 
+µb.applyDefaultListsetUpdates = function(
+    newSet, oldSet,
+    removeObsolete = true
+) {
+    if ( newSet.size === 0 || oldSet.size === 0 ) {
+        return;
+    }
+
+    const selectedListset = new Set(this.selectedFilterLists);
+    let selectedListModified = false;
+
+    if ( removeObsolete ) {
+        for ( const assetKey of oldSet ) {
+            if ( newSet.has(assetKey) ) {
+                continue;
+            }
+            if ( selectedListset.delete(assetKey) ) {
+                selectedListModified = true;
+            }
+        }
+    }
+
+    for ( const assetKey of newSet ) {
+        if ( oldSet.has(assetKey) ) {
+            continue;
+        }
+        if ( selectedListset.has(assetKey) ) {
+            continue;
+        }
+        selectedListset.add(assetKey);
+        selectedListModified = true;
+    }
+
+    if ( selectedListModified ) {
+        this.saveSelectedFilterLists(Array.from(selectedListset));
+    }
+};
+
+// This fixes missed default-list migrations when assets.json updates were
+// fetched by an older extension version and no proper migration was done.
+// - When run on startup, it compares a stored snapshot (lastDefaultListset)
+//   to the current defaults from assets.json and enables newly added defaults
+//   to avoid overriding user choices.
+// - For pre-1.69 upgrades with no snapshot, it snapshots the previously
+//   selected defaults and force-enables required Helium filters once.
+µb.reconcileDefaultListset = async function(bootstrap) {
+    const bin = await vAPI.storage.get('lastDefaultListset');
+    const lastDefaultListset =
+        bin instanceof Object ? bin.lastDefaultListset : undefined;
+
+    const assets = await io.metadata();
+
+    let currentDefaultListset =
+        assets['assets.json'] && assets['assets.json'].defaultListset;
+
+    if ( !Array.isArray(currentDefaultListset) ) {
+        currentDefaultListset =
+            Array.from(Object.entries(assets))
+                .filter(a =>
+                    a[1].content === 'filters' &&
+                    a[1].off === undefined &&
+                    /^https?:\/\//.test(a[0]) === false
+                )
+                .map(a => a[0]);
+    }
+
+    if ( Array.isArray(lastDefaultListset) ) {
+        const currentSet = new Set(currentDefaultListset);
+        const lastSet = new Set(lastDefaultListset);
+
+        // Skip if the default listset is unchanged.
+        if ( currentSet.size === lastSet.size &&
+            lastSet.isSubsetOf(currentSet) ) {
+            return;
+        }
+        this.applyDefaultListsetUpdates(
+            currentSet,
+            lastSet,
+            false
+        );
+    } else if ( bootstrap ) {
+        // Force-enable Helium filters for botched pre-1.69 upgrades.
+        // TODO: remove once most users have upgraded past 1.69.
+        const selectedListset = new Set(this.selectedFilterLists);
+        let selectedListModified = false;
+
+        for ( const assetKey of [ 'helium-annoyances', 'helium-unbreak' ] ) {
+            const entry = assets[assetKey];
+            if ( entry === undefined || entry.content !== 'filters' ) {
+                continue;
+            }
+            if ( selectedListset.has(assetKey) ) {
+                continue;
+            }
+            selectedListset.add(assetKey);
+            selectedListModified = true;
+        }
+
+        if ( selectedListModified ) {
+            this.saveSelectedFilterLists(Array.from(selectedListset));
+        }
+    }
+
+    // Persist snapshot for future default listset upgrades.
+    vAPI.storage.set({ lastDefaultListset: currentDefaultListset });
+};
+
 µb.applyFilterListSelection = function(details) {
     let selectedListKeySet = new Set(this.selectedFilterLists);
     let importedLists = this.userSettings.importedLists.slice();
@@ -1712,21 +1819,17 @@ onBroadcast(msg => {
                 .forEach(a => oldDefaultListset.add(a));
             if ( oldDefaultListset.size === 0 ) { return; }
         }
-        const selectedListset = new Set(this.selectedFilterLists);
-        let selectedListModified = false;
-        for ( const assetKey of oldDefaultListset ) {
-            if ( newDefaultListset.has(assetKey) ) { continue; }
-            selectedListset.delete(assetKey);
-            selectedListModified = true;
-        }
-        for ( const assetKey of newDefaultListset ) {
-            if ( oldDefaultListset.has(assetKey) ) { continue; }
-            selectedListset.add(assetKey);
-            selectedListModified = true;
-        }
-        if ( selectedListModified ) {
-            this.saveSelectedFilterLists(Array.from(selectedListset));
-        }
+
+        this.applyDefaultListsetUpdates(
+            newDefaultListset,
+            oldDefaultListset
+        );
+
+        // Save the new default listset snapshot for future upgrades.
+        vAPI.storage.set({
+            lastDefaultListset: Array.from(newDefaultListset)
+        });
+
         return;
     }
 };
