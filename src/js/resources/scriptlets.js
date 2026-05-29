@@ -31,6 +31,7 @@ import './prevent-addeventlistener.js';
 import './prevent-dialog.js';
 import './prevent-fetch.js';
 import './prevent-innerHTML.js';
+import './prevent-navigation.js';
 import './prevent-settimeout.js';
 import './prevent-xhr.js';
 import './replace-argument.js';
@@ -1611,6 +1612,24 @@ function multiup() {
     };
     document.addEventListener('click', handler, { capture: true });
 }
+
+/******************************************************************************/
+
+builtinScriptlets.push({
+    name: 'break-on-call.js',
+    fn: breakOnCall,
+    dependencies: [
+        'proxy-apply.fn',
+    ],
+});
+function breakOnCall(target) {
+    proxyApplyFn(target, function fetch(context) {
+        debugger;  // eslint-disable-line no-debugger
+        return context.reflect();
+    });
+}
+
+
 
 
 

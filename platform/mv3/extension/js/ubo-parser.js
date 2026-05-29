@@ -162,6 +162,8 @@ function minimizeRuleset(rules) {
     rules = mergeArrays(rules, 'condition.excludedRequestDomains');
     rules = mergeArrays(rules, 'condition.initiatorDomains');
     rules = mergeArrays(rules, 'condition.excludedInitiatorDomains');
+    rules = mergeArrays(rules, 'condition.topDomains');
+    rules = mergeArrays(rules, 'condition.excludedTopDomains');
     rules = mergeArrays(rules, 'condition.resourceTypes');
     rules = mergeArrays(rules, 'condition.excludedRequestMethods');
     rules = mergeArrays(rules, 'condition.requestMethods');
@@ -385,7 +387,7 @@ export function parseNetworkFilter(parser) {
             }
             break;
         }
-        case sfp.NODE_TYPE_NET_OPTION_NAME_HEADER: {
+        case sfp.NODE_TYPE_NET_OPTION_NAME_RESPONSEHEADER: {
             const details = sfp.parseHeaderValue(parser.getNetOptionValue(type));
             const headerInfo = {
                 header: details.name,

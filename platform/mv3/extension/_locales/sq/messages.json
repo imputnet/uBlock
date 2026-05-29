@@ -92,7 +92,7 @@
     "description": "Text label heading the import/export area of custom filters"
   },
   "customFiltersImportTextareaPlaceholder": {
-    "message": "Filtrat specifikë të personalizuar kalohen këtu",
+    "message": "Filtrat specifikë kozmetikë/skriptet shtohen këtu",
     "description": "Placeholder text which describes the purpose of the textarea widget"
   },
   "aboutChangelog": {
