@@ -38,6 +38,7 @@ import fs from 'fs/promises';
 import { hostnameCompare } from './js/offscreen/make-utils.js';
 import { literalStrFromRegex } from './js/offscreen/regex-analyzer.js';
 import { makeCosmeticScripts } from './js/offscreen/make-cosmetic-filters.js';
+import { minimizeRuleset } from './js/ubo-parser.js';
 import path from 'path';
 import process from 'process';
 import redirectResourcesMap from './js/redirect-resources.js';
@@ -253,9 +254,9 @@ rePatternFromUrlFilter.restrHostnameAnchor2 = '^[^:]+://([^:/]+)?';
 
 async function fetchListFromCache(assetDetails) {
     const fname = assetDetails.id;
-    logProgress(`Reading locally cached ${fname}`);
+    logProgress(`Reading locally cached ${platform}/${fname}`);
 
-    const content = await fs.readFile(`${cacheDir}/${fname}`,
+    const content = await fs.readFile(`${cacheDir}/${platform}/${fname}`,
         { encoding: 'utf8' }
     ).catch(( ) => { });
     if ( content !== undefined ) {
@@ -270,7 +271,7 @@ async function fetchListFromCache(assetDetails) {
     };
 
     const text = await fetchList(context, assetDetails);
-    writeFile(`${cacheDir}/${fname}`, text);
+    writeFile(`${cacheDir}/${platform}/${fname}`, text);
 
     if ( Boolean(text) === false ) {
         throw 'Filter list should not be empty';
@@ -570,7 +571,6 @@ async function processDnrRules(assetDetails, network, dnrRules) {
     const staticRules = await patchRuleset(
         dnrRules.filter(rule => isGood(rule) && isRegex(rule) === false)
     );
-    log(`\tStatic rules: ${staticRules.length}`);
     log(staticRules
         .filter(rule => Array.isArray(rule._warning))
         .map(rule => rule._warning.map(v => `\t\t${v}`))
@@ -580,7 +580,8 @@ async function processDnrRules(assetDetails, network, dnrRules) {
     const regexRules = await patchRuleset(
         dnrRules.filter(rule => isGood(rule) && isRegex(rule))
     );
-    log(`\tMaybe good (regexes): ${regexRules.length}`);
+    const minimizedRegexRuleset = minimizeRuleset(regexRules);
+    log(`\tMaybe good regexes (raw/minimized): ${regexRules.length}/${minimizedRegexRuleset.length}`);
 
     staticRules.forEach(rule => {
         if ( rule.action.redirect?.extensionPath === undefined ) { return; }
@@ -588,6 +589,10 @@ async function processDnrRules(assetDetails, network, dnrRules) {
             rule.action.redirect.extensionPath.replace(/^\/+/, '')
         );
     });
+
+    // Minimize rulesets
+    const minimizedStaticRuleset = minimizeRuleset(staticRules);
+    log(`\tStatic rules (raw/minimized): ${staticRules.length}/${minimizedStaticRuleset.length}`);
 
     const urlskips = new Map();
     for ( const rule of dnrRules ) {
@@ -637,12 +642,12 @@ async function processDnrRules(assetDetails, network, dnrRules) {
     log(bad.map(rule => rule._error.map(v => `\t\t${v}`)).join('\n'), true);
 
     writeFile(`${rulesetDir}/main/${assetDetails.id}.json`,
-        toJSONRuleset(staticRules)
+        toJSONRuleset(minimizedStaticRuleset)
     );
 
-    if ( regexRules.length !== 0 ) {
+    if ( minimizedRegexRuleset.length !== 0 ) {
         writeFile(`${rulesetDir}/regex/${assetDetails.id}.json`,
-            toJSONRuleset(regexRules)
+            toJSONRuleset(minimizedRegexRuleset)
         );
     }
 
@@ -653,10 +658,10 @@ async function processDnrRules(assetDetails, network, dnrRules) {
     }
 
     return {
-        total: staticRules.length + regexRules.length,
-        plain: staticRules.length,
+        total: minimizedStaticRuleset.length + minimizedRegexRuleset.length,
+        plain: minimizedStaticRuleset.length,
+        regex: minimizedRegexRuleset.length,
         rejected: bad.length,
-        regex: regexRules.length,
         urlskip: urlskips.size || undefined,
     };
 }
@@ -905,7 +910,17 @@ async function processPopupRules(assetDetails, popupRules) {
             return data;
         }
         if ( Array.isArray(condition.requestDomains) ) {
-            realm.hostnames = realm.hostnames.concat(condition.requestDomains);
+            realm.hostnames = realm.hostnames.concat(
+                condition.requestDomains
+            );
+        }
+        // https://github.com/uBlockOrigin/uAssets/issues/33581
+        if ( type === 'block' ) {
+            if ( Array.isArray(condition.excludedRequestDomains) ) {
+                data.allow.hostnames = data.allow.hostnames.concat(
+                    condition.excludedRequestDomains
+                );
+            }
         }
         return data;
     };
