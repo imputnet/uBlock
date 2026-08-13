@@ -227,7 +227,9 @@ function addExtendedToDNR(context, parser) {
         if ( not && exception ) { continue; }
         if ( not || exception ) {
             excludeMatches.push(hn);
-        } else if ( hn !== '*' ) {
+        } else if ( hn === '*' ) {
+            addGenericCosmeticFilter(context, compiled, false);
+        } else {
             matches.push(hn);
         }
     }
@@ -434,25 +436,6 @@ function finalizeRuleset(context, network) {
         for ( const rule of ruleset ) {
             rulesetMap.set(ruleId++, rule);
         }
-    }
-    mergeRules(rulesetMap, 'resourceTypes');
-    mergeRules(rulesetMap, 'removeParams');
-    mergeRules(rulesetMap, 'initiatorDomains');
-    mergeRules(rulesetMap, 'requestDomains');
-    mergeRules(rulesetMap, 'responseHeaders');
-
-    // Convert back single-entry requestDomains into pattern-based filters
-    // https://github.com/uBlockOrigin/uBOL-home/issues/327
-    // TODO: Remove when (if) Safari is changed to interpret requestDomains as
-    //       in other browsers.
-    for ( const rule of rulesetMap.values() ) {
-        const { condition } = rule;
-        if ( condition?.requestDomains === undefined ) { continue; }
-        if ( condition.requestDomains.length !== 1 ) { continue; }
-        if ( condition.urlFilter !== undefined ) { continue; }
-        if ( condition.regexFilter !== undefined ) { continue; }
-        condition.urlFilter = `||${condition.requestDomains[0]}^`;
-        condition.requestDomains = undefined;
     }
 
     // Patch id

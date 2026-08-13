@@ -1,3 +1,24 @@
+- [[logger] Preserve whitespace characters](https://github.com/gorhill/uBlock/commit/ef981d09b5)
+- [Improve `proxy-apply` utility scriptlet](https://github.com/gorhill/uBlock/commit/be3bb05fce)
+- [Improve `abort-current-script` scriptlet](https://github.com/gorhill/uBlock/commit/84e4bd7659)
+- [Improve `prevent-addEventListener` scriptlet](https://github.com/gorhill/uBlock/commit/89fe40d73f)
+- [Add shim for `piano-analytics.js`](https://github.com/gorhill/uBlock/commit/5dab3cbd24)
+- [Improve `trusted-click-element` scriptlet](https://github.com/gorhill/uBlock/commit/bdd39fe606)
+- [Add `prevent-clipboard-write` scriptlet](https://github.com/gorhill/uBlock/commit/735f61b8a4)
+- [Improve `prevent-bab` scriptlet](https://github.com/gorhill/uBlock/commit/6772215c35)
+- [[jsonpath] Increase RFC9535 compliance](https://github.com/gorhill/uBlock/commit/b123c23a4f)
+- [Dot notation before bracket notation is not valid](https://github.com/gorhill/uBlock/commit/028ffdbea3)
+
+----------
+
+# 1.72.2
+
+- [Add missing test against `null` object](https://github.com/gorhill/uBlock/commit/74e6c8fe3f)
+
+----------
+
+# 1.72.0
+
 - [Fix broken rendering of final URL in strict-block page](https://github.com/gorhill/uBlock/commit/fe8ce9804c)
 - [Fix potential exception in set-attribute scriptlet](https://github.com/gorhill/uBlock/commit/37fe5d9cbe)
 - [Improve parsing/interpretation of consecutive `$$` in network filters](https://github.com/gorhill/uBlock/commit/347f9f7fda)

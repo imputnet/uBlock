@@ -118,10 +118,6 @@ export default new Map([
     [ 'nitropay_ads.js', {
         data: 'text',
     } ],
-    [ 'nobab.js', {
-        alias: [ 'bab-defuser.js', 'prevent-bab.js' ],
-        data: 'text',
-    } ],
     [ 'nobab2.js', {
         data: 'text',
     } ],
@@ -182,6 +178,8 @@ export default new Map([
     } ],
     [ 'outbrain-widget.js', {
         alias: 'widgets.outbrain.com/outbrain.js',
+    } ],
+    [ 'piano-analytics.js', {
     } ],
     [ 'popads.js', {
         alias: [ 'popads.net.js', 'prevent-popads-net.js' ],

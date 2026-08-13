@@ -35,6 +35,10 @@
     "message": "Chính sách bảo mật",
     "description": "Link to privacy policy on GitHub (English)"
   },
+  "aboutDocumentation": {
+    "message": "Tài liệu hướng dẫn",
+    "description": "Link to documentation in About pane"
+  },
   "popupFilteringModeLabel": {
     "message": "chế độ lọc",
     "description": "Label in the popup panel for the current filtering mode"
@@ -96,7 +100,7 @@
     "description": "Text label heading the import area of custom filter lists"
   },
   "customListImportPlaceholder": {
-    "message": "Dán URL của danh sách bộ lọc vào đây để thêm",
+    "message": "URL của danh sách bộ lọc cần thêm",
     "description": "Placeholder text which describes the purpose of the textarea widget"
   },
   "customFiltersImportExportLabel": {

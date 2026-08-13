@@ -20,6 +20,7 @@
 
 */
 
+import './abort-current-script.js';
 import './attribute.js';
 import './create-html.js';
 import './href-sanitizer.js';
@@ -28,6 +29,8 @@ import './json-prune.js';
 import './noeval.js';
 import './object-prune.js';
 import './prevent-addeventlistener.js';
+import './prevent-bab.js';
+import './prevent-clipboard-write.js';
 import './prevent-dialog.js';
 import './prevent-fetch.js';
 import './prevent-innerHTML.js';
@@ -56,9 +59,6 @@ import { registeredScriptlets } from './base.js';
 import { safeSelf } from './safe-self.js';
 import { validateConstantFn } from './set-constant.js';
 
-// Externally added to the private namespace in which scriptlets execute.
-/* global scriptletGlobals */
-
 /* eslint no-prototype-builtins: 0 */
 
 export const builtinScriptlets = registeredScriptlets;
@@ -68,137 +68,6 @@ export const builtinScriptlets = registeredScriptlets;
     Helper functions
     
     These are meant to be used as dependencies to injectable scriptlets.
-
-*******************************************************************************/
-
-builtinScriptlets.push({
-    name: 'should-debug.fn',
-    fn: shouldDebug,
-});
-function shouldDebug(details) {
-    if ( details instanceof Object === false ) { return false; }
-    return scriptletGlobals.canDebug && details.debug;
-}
-
-/******************************************************************************/
-
-builtinScriptlets.push({
-    name: 'abort-current-script.fn',
-    fn: abortCurrentScriptFn,
-    dependencies: [
-        'get-exception-token.fn',
-        'safe-self.fn',
-        'should-debug.fn',
-    ],
-});
-// Issues to mind before changing anything:
-//  https://github.com/uBlockOrigin/uBlock-issues/issues/2154
-function abortCurrentScriptFn(
-    target = '',
-    needle = '',
-    context = ''
-) {
-    if ( typeof target !== 'string' ) { return; }
-    if ( target === '' ) { return; }
-    const safe = safeSelf();
-    const logPrefix = safe.makeLogPrefix('abort-current-script', target, needle, context);
-    const reNeedle = safe.patternToRegex(needle);
-    const reContext = safe.patternToRegex(context);
-    const extraArgs = safe.getExtraArgs(Array.from(arguments), 3);
-    const thisScript = document.currentScript;
-    const chain = safe.String_split.call(target, '.');
-    let owner = window;
-    let prop;
-    for (;;) {
-        prop = chain.shift();
-        if ( chain.length === 0 ) { break; }
-        if ( prop in owner === false ) { break; }
-        owner = owner[prop];
-        if ( owner instanceof Object === false ) { return; }
-    }
-    let value;
-    let desc = Object.getOwnPropertyDescriptor(owner, prop);
-    if (
-        desc instanceof Object === false ||
-        desc.get instanceof Function === false
-    ) {
-        value = owner[prop];
-        desc = undefined;
-    }
-    const debug = shouldDebug(extraArgs);
-    const exceptionToken = getExceptionTokenFn();
-    const scriptTexts = new WeakMap();
-    const textContentGetter = Object.getOwnPropertyDescriptor(Node.prototype, 'textContent').get;
-    const getScriptText = elem => {
-        let text = textContentGetter.call(elem);
-        if ( text.trim() !== '' ) { return text; }
-        if ( scriptTexts.has(elem) ) { return scriptTexts.get(elem); }
-        const [ , mime, content ] =
-            /^data:([^,]*),(.+)$/.exec(elem.src.trim()) ||
-            [ '', '', '' ];
-        try {
-            switch ( true ) {
-            case mime.endsWith(';base64'):
-                text = self.atob(content);
-                break;
-            default:
-                text = self.decodeURIComponent(content);
-                break;
-            }
-        } catch {
-        }
-        scriptTexts.set(elem, text);
-        return text;
-    };
-    const validate = ( ) => {
-        const e = document.currentScript;
-        if ( e instanceof HTMLScriptElement === false ) { return; }
-        if ( e === thisScript ) { return; }
-        if ( context !== '' && reContext.test(e.src) === false ) {
-            // eslint-disable-next-line no-debugger
-            if ( debug === 'nomatch' || debug === 'all' ) { debugger; }
-            return;
-        }
-        if ( safe.logLevel > 1 && context !== '' ) {
-            safe.uboLog(logPrefix, `Matched src\n${e.src}`);
-        }
-        const scriptText = getScriptText(e);
-        if ( reNeedle.test(scriptText) === false ) {
-            // eslint-disable-next-line no-debugger
-            if ( debug === 'nomatch' || debug === 'all' ) { debugger; }
-            return;
-        }
-        if ( safe.logLevel > 1 ) {
-            safe.uboLog(logPrefix, `Matched text\n${scriptText}`);
-        }
-        // eslint-disable-next-line no-debugger
-        if ( debug === 'match' || debug === 'all' ) { debugger; }
-        safe.uboLog(logPrefix, 'Aborted');
-        throw new ReferenceError(exceptionToken);
-    };
-    // eslint-disable-next-line no-debugger
-    if ( debug === 'install' ) { debugger; }
-    try {
-        Object.defineProperty(owner, prop, {
-            get: function() {
-                validate();
-                return desc instanceof Object
-                    ? desc.get.call(owner)
-                    : value;
-            },
-            set: function(a) {
-                validate();
-                if ( desc instanceof Object ) {
-                    desc.set.call(owner, a);
-                } else {
-                    value = a;
-                }
-            }
-        });
-    } catch(ex) {
-        safe.uboErr(logPrefix, `Error: ${ex}`);
-    }
-}
 
 /******************************************************************************/
 
@@ -391,29 +260,6 @@ function replaceFetchResponseFn(
     Injectable scriptlets
 
     These are meant to be used in the MAIN (webpage) execution world.
-
-*******************************************************************************/
-
-builtinScriptlets.push({
-    name: 'abort-current-script.js',
-    aliases: [
-        'acs.js',
-        'abort-current-inline-script.js',
-        'acis.js',
-    ],
-    fn: abortCurrentScript,
-    dependencies: [
-        'abort-current-script.fn',
-        'run-at-html-element.fn',
-    ],
-});
-// Issues to mind before changing anything:
-//  https://github.com/uBlockOrigin/uBlock-issues/issues/2154
-function abortCurrentScript(...args) {
-    runAtHtmlElementFn(( ) => {
-        abortCurrentScriptFn(...args);
-    });
-}
 
 /******************************************************************************/
 
@@ -1806,10 +1652,27 @@ function trustedReplaceXhrResponse(
 
 /*******************************************************************************
  * 
- * trusted-click-element.js
+ * @scriptlet trusted-click-element
  * 
- * Reference API:
- * https://github.com/AdguardTeam/Scriptlets/blob/master/src/scriptlets/trusted-click-element.ts
+ * @description
+ * Programmatically click on one or more elements.
+ * 
+ * @param steps
+ * A comma-separated list of steps to fulfilled:
+ * - A valid CSS selector matching an element to programmatically click
+ * - A integer: A delay in milliseconds to wait before the next step is
+ *   processed. If the last step is an integer, it is used as a timeout value
+ *   before the scriptlet bails out (default to 11s)
+ * If the list of steps starts with `;` or `|`, it will be used as the
+ * separator character instead of comma. This is convenient when a selector
+ * contains a comma character.
+ * A selector must be one of:
+ * - A valid plain CSS selector
+ * - An xpath expression: xpath:[expression]
+ * Addtionally:
+ * - Use `>>>` between selectors to target an element inside a shadow root
+ * - Prepend with `when-visible:[selector]` to progrmatically click the element
+ *   only when it is visible
  * 
  **/
 
@@ -1878,10 +1741,16 @@ function trustedClickElement(
         }
     }
 
-    const steps = safe.String_split.call(selectors, /\s*,\s*/).map(a => {
-        if ( /^\d+$/.test(a) ) { return parseInt(a, 10); }
-        return a;
-    });
+    const steps = (( ) => {
+        const steps = /^[;|]/.test(selectors)
+            ? safe.String_split.call(selectors.slice(1), selectors.charAt(0))
+            : safe.String_split.call(selectors, ',');
+        return steps.map(a => {
+            a = a.trim();
+            if ( /^\d+$/.test(a) ) { return parseInt(a, 10); }
+            return a;
+        });
+    })();
     if ( steps.length === 0 ) { return; }
     const clickDelay = parseInt(delay, 10) || 1;
     for ( let i = steps.length-1; i > 0; i-- ) {

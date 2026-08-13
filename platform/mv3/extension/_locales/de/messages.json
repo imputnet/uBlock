@@ -28,12 +28,16 @@
     "description": "appears as tab name in dashboard. Inspired from 'Develop' menu in Safari, see https://developer.apple.com/documentation/safari-developer-tools/develop-menu"
   },
   "aboutPageName": {
-    "message": "Über",
+    "message": "Informationen",
     "description": "appears as tab name in dashboard"
   },
   "aboutPrivacyPolicy": {
     "message": "Datenschutzhinweise",
     "description": "Link to privacy policy on GitHub (English)"
+  },
+  "aboutDocumentation": {
+    "message": "Dokumentation",
+    "description": "Link to documentation in About pane"
   },
   "popupFilteringModeLabel": {
     "message": "Filtermodus",
@@ -92,11 +96,11 @@
     "description": "Header for a ruleset section in 'Filter lists pane'"
   },
   "customListImportLabel": {
-    "message": "Filterliste hinzufügen …",
+    "message": "Filterliste hinzufügen …",
     "description": "Text label heading the import area of custom filter lists"
   },
   "customListImportPlaceholder": {
-    "message": "URL der neuen Filterliste zum Hinzufügen einfügen",
+    "message": "URL der Filterliste hier einfügen",
     "description": "Placeholder text which describes the purpose of the textarea widget"
   },
   "customFiltersImportExportLabel": {
@@ -104,7 +108,7 @@
     "description": "Text label heading the import/export area of custom filters"
   },
   "customFiltersImportTextareaPlaceholder": {
-    "message": "Kosmetische Filter oder Scriptlets zum Hinzufügen einfügen",
+    "message": "Kosmetische Filter oder Scriptlets hier einfügen",
     "description": "Placeholder text which describes the purpose of the textarea widget"
   },
   "userScriptsInfo": {
