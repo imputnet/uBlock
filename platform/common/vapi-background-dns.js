@@ -32,7 +32,8 @@ const isResolvedObject = o => o instanceof Object &&
     o instanceof Promise === false;
 const reIPv4 = /^\d+\.\d+\.\d+\.\d+$/
 
-// resolveRecord returns a DNS record, or null when this request must skip DNS.
+// resolveRecord is called with the Net instance as this. It returns a DNS
+// record, or null when this request must skip DNS.
 // Rejections are ordinary DNS failures and are cached with the usual TTL.
 export const NetWithDNS = (Base, resolveRecord, skipDNS = ( ) => false) => class extends Base {
     constructor() {
@@ -51,6 +52,12 @@ export const NetWithDNS = (Base, resolveRecord, skipDNS = ( ) => false) => class
         this.cnameIgnoreRootDocument = true;
         this.cnameReplayFullURL = false;
         this.dnsResolveEnabled = true;
+    }
+
+    disableDNS() {
+        this.canUncloakCnames = false;
+        this.dnsList.fill(null);
+        this.dnsDict.clear();
     }
 
     setOptions(options) {
@@ -111,6 +118,9 @@ export const NetWithDNS = (Base, resolveRecord, skipDNS = ( ) => false) => class
     }
 
     onBeforeSuspendableRequest(details) {
+        if ( this.canUncloakCnames === false ) {
+            return super.onBeforeSuspendableRequest(details);
+        }
         const hn = hostnameFromNetworkURL(details.url);
         const dnsEntry = this.dnsFromCache(hn);
         if ( isResolvedObject(dnsEntry) && dnsEntry.ip ) {
@@ -136,6 +146,7 @@ export const NetWithDNS = (Base, resolveRecord, skipDNS = ( ) => false) => class
     }
 
     onAfterDNSResolution(hn, details, dnsEntry) {
+        if ( this.canUncloakCnames === false ) { return; }
         if ( dnsEntry === undefined ) {
             dnsEntry = this.dnsFromCache(hn);
             if ( isResolvedObject(dnsEntry) === false ) { return; }
@@ -159,6 +170,7 @@ export const NetWithDNS = (Base, resolveRecord, skipDNS = ( ) => false) => class
     }
 
     dnsToCache(hn, record, details) {
+        if ( this.canUncloakCnames === false ) { return; }
         const dnsEntry = { hn, until: Date.now() + this.dnsCacheTTL * 1000 };
         if ( record ) {
             const cname = this.cnameFromRecord(hn, record, details);
@@ -216,7 +228,8 @@ export const NetWithDNS = (Base, resolveRecord, skipDNS = ( ) => false) => class
     }
 
     dnsResolve(hn, details) {
-        const promise = resolveRecord(hn, details).then(
+        if ( this.canUncloakCnames === false ) { return Promise.resolve(); }
+        const promise = resolveRecord.call(this, hn, details).then(
             rec => {
                 if ( rec === null ) {
                     // This skip applies to the request, not the whole hostname.
@@ -229,7 +242,9 @@ export const NetWithDNS = (Base, resolveRecord, skipDNS = ( ) => false) => class
             },
             ( ) => this.dnsToCache(hn)
         );
-        this.dnsDict.set(hn, promise);
+        if ( this.canUncloakCnames ) {
+            this.dnsDict.set(hn, promise);
+        }
         return promise;
     }
 

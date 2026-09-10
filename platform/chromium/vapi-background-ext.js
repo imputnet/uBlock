@@ -252,19 +252,42 @@ vAPI.scriptletsInjector = (( ) => {
 
 /******************************************************************************/
 
-if ( typeof browser.dns?.resolve === 'function' ) {
-    vAPI.Net = NetWithDNS(vAPI.Net, async (hn, details) => {
+// DNS uncloaking and startup suspension both require the browser to await
+// blocking listeners. The existence of a DNS API alone does not guarantee it.
+if (
+    typeof browser.dns?.resolve === 'function' &&
+    browser.webRequest.onBeforeRequest.supportsBlockingPromises === true
+) {
+    vAPI.Net = NetWithDNS(vAPI.Net, async function(hn, details) {
+        let pending;
+        try {
+            pending = browser.dns.resolve(hn, [ 'canonical_name' ], details.url);
+        } catch {
+            // A synchronous failure means this API does not accept our call.
+            this.disableDNS();
+            return null;
+        }
+        if ( pending instanceof Promise === false ) {
+            this.disableDNS();
+            return null;
+        }
         let record;
         try {
-            record = await browser.dns.resolve(hn, [ 'canonical_name' ], details.url);
+            record = await pending;
         } catch (reason) {
             if ( reason?.message === 'net::ERR_DNS_DIRECT_ONLY' ) {
                 return null;
             }
             throw reason;
         }
-        if ( Array.isArray(record?.addresses) === false ) {
-            throw new Error('Unsupported DNS response');
+        if (
+            Array.isArray(record?.addresses) === false ||
+            record.addresses.some(address => typeof address !== 'string') ||
+            (record.canonicalName !== undefined &&
+                typeof record.canonicalName !== 'string')
+        ) {
+            this.disableDNS();
+            return null;
         }
         return record;
     });
