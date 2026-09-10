@@ -19,6 +19,8 @@
     Home: https://github.com/gorhill/uBlock
 */
 
+import { NetWithDNS } from './vapi-background-dns.js';
+
 /******************************************************************************/
 
 // https://github.com/uBlockOrigin/uBlock-issues/issues/1659
@@ -249,3 +251,21 @@ vAPI.scriptletsInjector = (( ) => {
 })();
 
 /******************************************************************************/
+
+if ( typeof browser.dns?.resolve === 'function' ) {
+    vAPI.Net = NetWithDNS(vAPI.Net, async (hn, details) => {
+        let record;
+        try {
+            record = await browser.dns.resolve(hn, [ 'canonical_name' ], details.url);
+        } catch (reason) {
+            if ( reason?.message === 'net::ERR_DNS_DIRECT_ONLY' ) {
+                return null;
+            }
+            throw reason;
+        }
+        if ( Array.isArray(record?.addresses) === false ) {
+            throw new Error('Unsupported DNS response');
+        }
+        return record;
+    });
+}
