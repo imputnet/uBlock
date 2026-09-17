@@ -116,7 +116,7 @@
     "description": "Placeholder text which describes the purpose of the textarea widget"
   },
   "userScriptsInfo": {
-    "message": "İçeri aktarılmış listelerdeki kozmetik veya kod filtrelerini uygulamak için uBO Lite'a kullanıcı komut dosyalarını çalıştırma izni vermeniz gerekir. İzni vermek için tarayıcınızın uzantılar sayfasını açın (Chrome için:<code>chrome://extensions</code> Firefox için:<code>about:addons</code>), <b>uBO Lite</b>'ın ayrıntılar sayfasına tıklayın ve <b>Kullanıcı komut dosyalarına izin ver</b> seçeneğine tıklayın (\"doğrulanmamış 3. parti komutlar\" olarak da adlandırılabilir).",
+    "message": "Tarayıcınızın uzantılar sayfasını açın (Chrome için:<code>chrome://extensions</code> Firefox için:<code>about:addons</code>), <b>uBO Lite</b>'ın ayrıntılar sayfasına tıklayın ve <b>Kullanıcı komut dosyalarına izin ver</b> seçeneğine tıklayın (\"doğrulanmamış 3. parti komutlar\" olarak da adlandırılabilir).",
     "description": "A notice to inform user on how to enable 'user scripts' permission"
   },
   "aboutChangelog": {

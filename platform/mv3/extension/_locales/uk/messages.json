@@ -100,7 +100,7 @@
     "description": "Text label heading the import area of custom filter lists"
   },
   "customListImportPlaceholder": {
-    "message": "Вставте сюди URL-адресу списку фільтрів, який потрібно додати",
+    "message": "URL-адреса списку фільтрів, який потрібно додати",
     "description": "Placeholder text which describes the purpose of the textarea widget"
   },
   "customListImportUserScriptsInfo": {
@@ -116,7 +116,7 @@
     "description": "Placeholder text which describes the purpose of the textarea widget"
   },
   "userScriptsInfo": {
-    "message": "Щоб застосувати косметичні фільтри або фільтри на основі скриптів із імпортованих списків, необхідно надати uBO Lite дозвіл на виконання користувацьких скриптів. Відкрийте сторінку розширень у браузері (<code>chrome://extensions</code> у Chrome або <code>about:addons</code> у Firefox), перейдіть до детальної інформації про <b>uBO Lite</b> та увімкніть опцію <b>«Дозволити користувацькі скрипти»</b> (також відомі як «неперевірені сторонні скрипти»).",
+    "message": "Відкрийте сторінку розширень у браузері (<code>chrome://extensions</code> у Chrome або <code>about:addons</code> у Firefox), перейдіть до детальної інформації про <b>uBO Lite</b> та увімкніть опцію <b>«Дозволити користувацькі скрипти»</b> (також відомі як «неперевірені сторонні скрипти»).",
     "description": "A notice to inform user on how to enable 'user scripts' permission"
   },
   "aboutChangelog": {

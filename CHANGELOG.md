@@ -1,3 +1,17 @@
+- [Improve `remove-attr` scriptlet](https://github.com/gorhill/uBlock/commit/bd98bcace0)
+- [Fix parsing of invalid regex-like domain in static extended filters](https://github.com/gorhill/uBlock/commit/bfbd7f609e)
+- [Improve `remove-node-text`/`replace-node-text` scriptlets](https://github.com/gorhill/uBlock/commit/71faa0b23f)
+- [Improve `prevent-clipboard-write` scriptlet](https://github.com/gorhill/uBlock/commit/457c510093)
+- [Address multiple static filter parser issues](https://github.com/gorhill/uBlock/commit/3ab731942e)
+- [Treat resources with data as redirectable](https://github.com/gorhill/uBlock/commit/c9eb5b276d)
+- [Add `mpegdash-prune` scriptlet](https://github.com/gorhill/uBlock/commit/323b4ce279)
+- [Improve `xmlPrune` scriptlet](https://github.com/gorhill/uBlock/commit/1235e4dd27)
+- [Improve procedural operator `:matches-path()`](https://github.com/gorhill/uBlock/commit/43d3c74ce7)
+
+----------
+
+# 1.74.0
+
 - [Fix possible injection of scriptlets requiring trust from non-trusted sources](https://github.com/gorhill/uBlock/commit/a46d5c8e75)
 - [Import `google-ima-dai` shim from AdGuard shims](https://github.com/gorhill/uBlock/commit/933efff4dd)
 - [Replace List-KR with filterslists-KO](https://github.com/gorhill/uBlock/commit/20d3c5b9d0)

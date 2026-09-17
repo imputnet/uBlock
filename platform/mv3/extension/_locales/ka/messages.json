@@ -116,7 +116,7 @@
     "description": "Placeholder text which describes the purpose of the textarea widget"
   },
   "userScriptsInfo": {
-    "message": "გარეგნული ან მცირე სკრიპტის ფილტრების იძულებით ასამოქმედებლად შემოტანილი სიებიდან, uBO Lite უნდა იყოს სკრიპტების გაშვების ნებართვის მქონე. გახსენით ბრაუზერის გაფართოებების გვერდი (<code>chrome://extensions</code> Chrome-ში ან <code>about:addons</code> Firefox-ში), იხილეთ <b>uBO Lite</b> ვრცლად და გადართეთ <b>მომხმარებლის სკრიპტების ნებართვა</b> (აგრეთვე შეიძლება ეწეროს „დაუმოწმებელი გარეშე სკრიპტები“).",
+    "message": "გახსენით ბრაუზერის გაფართოებების გვერდი (<code>chrome://extensions</code> Chrome-ში ან <code>about:addons</code> Firefox-ში), იხილეთ <b>uBO Lite</b> ვრცლად და გადართეთ <b>მომხმარებლის სკრიპტების ნებართვა</b> (აგრეთვე შეიძლება ეწეროს „დაუმოწმებელი გარეშე სკრიპტები“).",
     "description": "A notice to inform user on how to enable 'user scripts' permission"
   },
   "aboutChangelog": {
