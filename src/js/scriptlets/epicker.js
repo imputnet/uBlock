@@ -1287,8 +1287,12 @@ let pickerBootArgs;
 let pickerFramePort = null;
 
 const bootstrap = async ( ) => {
+    const pickerPassword = await vAPI.messaging.send('elementPicker', {
+        what: 'elementPickerPassword'
+    });
+    if ( typeof pickerPassword !== 'string' ) { return; }
     pickerBootArgs = await vAPI.messaging.send('elementPicker', {
-        what: 'elementPickerArguments',
+        what: 'elementPickerArguments'
     });
     if ( typeof pickerBootArgs !== 'object' ) { return; }
     if ( pickerBootArgs === null ) { return; }
@@ -1317,7 +1321,7 @@ const bootstrap = async ( ) => {
                 quitPicker();
             };
             iframe.contentWindow.postMessage(
-                { what: 'epickerStart' },
+                { what: 'epickerStart', password: pickerPassword },
                 url.href,
                 [ channel.port2 ]
             );
