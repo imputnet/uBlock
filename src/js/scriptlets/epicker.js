@@ -1311,21 +1311,23 @@ const bootstrap = async ( ) => {
         iframe.setAttribute(pickerUniqueId, '');
         document.documentElement.append(iframe);
         iframe.addEventListener('load', ( ) => {
-            iframe.setAttribute(`${pickerUniqueId}-loaded`, '');
-            const channel = new MessageChannel();
-            pickerFramePort = channel.port1;
-            pickerFramePort.onmessage = ev => {
-                onDialogMessage(ev.data || {});
-            };
-            pickerFramePort.onmessageerror = ( ) => {
-                quitPicker();
-            };
-            iframe.contentWindow.postMessage(
-                { what: 'epickerStart', password: pickerPassword },
-                url.href,
-                [ channel.port2 ]
-            );
-            resolve(iframe);
+            self.setTimeout(( ) => {
+                iframe.setAttribute(`${pickerUniqueId}-loaded`, '');
+                const channel = new MessageChannel();
+                pickerFramePort = channel.port1;
+                pickerFramePort.onmessage = ev => {
+                    onDialogMessage(ev.data || {});
+                };
+                pickerFramePort.onmessageerror = ( ) => {
+                    quitPicker();
+                };
+                iframe.contentWindow.postMessage(
+                    { what: 'epickerStart', password: pickerPassword },
+                    url.href,
+                    [ channel.port2 ]
+                );
+                resolve(iframe);
+            }, 147);
         }, { once: true });
         iframe.contentWindow.location = url.href;
     });
