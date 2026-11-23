@@ -15,6 +15,8 @@ jobs:
     name: Build packages
     runs-on: ubuntu-slim
     if: startsWith(github.ref, 'refs/tags/')
+    env:
+      HAS_CRX_KEY: ${{ secrets.CRX_SIGNING_KEY != '' }}
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -37,6 +39,24 @@ jobs:
       - name: Build MV2 packages
         run: |
           tools/make-chromium.sh ${{ env.VERSION }}
+      - name: Install Rust
+        if: env.HAS_CRX_KEY == 'true'
+        uses: dtolnay/rust-toolchain@stable
+      - name: Install omaha-publish
+        if: env.HAS_CRX_KEY == 'true'
+        run: |
+          cargo install omaha-publish --version '^0.2' \
+            --locked --no-default-features --features cli
+      - name: Pack CRX
+        if: env.HAS_CRX_KEY == 'true'
+        run: |
+          crx="dist/build/uBlock0_${VERSION}.chromium.crx"
+          key="${RUNNER_TEMP:?}/crx.pem"
+          trap 'rm -f "$key"' EXIT
+          (umask 077 && printf '%s\n' "$CRX_SIGNING_KEY" > "$key")
+          omaha-publish pack --key "$key" dist/build/uBlock0.chromium "$crx"
+        env:
+          CRX_SIGNING_KEY: ${{ secrets.CRX_SIGNING_KEY }}
       - name: Assemble release notes
         run: |
           > release.body.txt
@@ -55,3 +75,4 @@ jobs:
           body_path: release.body.txt
           files: |
             dist/build/uBlock0_${{ env.VERSION }}.chromium.zip
+            dist/build/uBlock0_${{ env.VERSION }}.chromium.crx
