@@ -35,23 +35,25 @@ function uBO_legacyIsolatedWorldWrapper(details) {
     if ( details.mainCode ) {
         const doc = document;
         const { sentinel } = details;
-        let script;
+        const container = doc.createElement('div');
+        const shadowRoot = container.attachShadow({ mode: 'closed' });
+        try {
+            (doc.head || doc.documentElement).appendChild(container);
+        } catch {
+            return 0;
+        }
         try {
             const code = [
                 `self['${sentinel}'] = true;`,
                 details.mainCode,
             ].join('\n');
-            script = doc.createElement('script');
+            const script = doc.createElement('script');
             script.appendChild(doc.createTextNode(code));
-            (doc.head || doc.documentElement).appendChild(script);
+            shadowRoot.append(script);
         } catch {
         }
-        if ( script ) {
-            script.remove();
-            script.textContent = '';
-            script = undefined;
-        }
         if ( self.wrappedJSObject[sentinel] ) {
+            container.remove();
             delete self.wrappedJSObject[sentinel];
             return 0;
         }
@@ -65,14 +67,14 @@ function uBO_legacyIsolatedWorldWrapper(details) {
                 { type: 'text/javascript; charset=utf-8' }
             );
             url = self.URL.createObjectURL(blob);
-            script = doc.createElement('script');
+            const script = doc.createElement('script');
             script.async = false;
             script.src = url;
-            (doc.head || doc.documentElement || doc).append(script);
+            shadowRoot.append(script);
         } catch {
         }
+        container.remove();
         if ( url ) {
-            if ( script ) { script.remove(); }
             self.URL.revokeObjectURL(url);
         }
     }
