@@ -22,6 +22,9 @@ cp platform/chromium/*.json $DES/
 # Chrome store-specific
 cp -R $DES/_locales/nb $DES/_locales/no
 
+echo "*** uBlock0.chromium: Stripping remote asset URLs"
+python3 tools/strip-remote-assets.py $DES/assets/assets*.json
+
 echo "*** uBlock0.chromium: Generating meta..."
 python3 tools/make-chromium-meta.py $DES/
 
