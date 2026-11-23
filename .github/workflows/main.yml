@@ -20,6 +20,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
+          filter: blob:none
+      - name: Ensure tag points to a commit on main
+        run: |
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "::error::Tag ${GITHUB_REF_NAME} is not on main"
+            exit 1
+          fi
       - name: Clone uAssets
         run: |
           tools/pull-assets.sh
