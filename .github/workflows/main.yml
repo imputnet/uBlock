@@ -63,16 +63,7 @@ jobs:
           grep -m1 -B10000 -- "----------" CHANGELOG.md >> release.body.txt
           sed -e 's/%version%/${{ env.VERSION }}/g' .github/workflows/RELEASE.HEAD.md >> release.body.txt
       - name: Create GitHub release
-        id: create_release
-        uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+        uses: imputnet/immutable-release@v1
         with:
-          tag_name: ${{ env.VERSION }}
-          name: ${{ env.VERSION }}
-          draft: true
-          prerelease: true
-          body_path: release.body.txt
-          files: |
-            dist/build/uBlock0_${{ env.VERSION }}.chromium.zip
-            dist/build/uBlock0_${{ env.VERSION }}.chromium.crx
+          notes-file: release.body.txt
+          files: dist/build/uBlock0_${{ env.VERSION }}.chromium.*
