@@ -525,7 +525,7 @@ let assetSourceRegistry = Object.create(null);
 function getAssetSourceRegistry() {
     if ( assetSourceRegistryPromise === undefined ) {
         assetSourceRegistryPromise = cacheStorage.get(
-            'assetSourceRegistry'
+            'assetSourceRegistry' + (µb.assetsBootstrapLocation ?? '')
         ).then(bin => {
             if ( bin instanceof Object ) {
                 if ( bin.assetSourceRegistry instanceof Object ) {
