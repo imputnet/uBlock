@@ -1494,14 +1494,13 @@ onBroadcast(msg => {
     let toOverwrite = {};
     let data;
     try {
-        const store = await vAPI.adminStorage.get([
-            'adminSettings',
-            'toOverwrite',
-        ]) || {};
+        const [ store = {}, json ] = await Promise.all([
+            vAPI.adminStorage.get([ 'toOverwrite' ]),
+            vAPI.adminStorage.getUncached('adminSettings'),
+        ]);
         if ( store.toOverwrite instanceof Object ) {
             toOverwrite = store.toOverwrite;
         }
-        const json = store.adminSettings;
         if ( typeof json === 'string' && json !== '' ) {
             data = JSON.parse(json);
         } else if ( json instanceof Object ) {
