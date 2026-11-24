@@ -521,25 +521,32 @@ assets.fetchFilterList = async function(mainlistURL) {
 
 let assetSourceRegistryPromise;
 let assetSourceRegistry = Object.create(null);
+let assetSourceRegistryKey;
+
+const assetSourceRegistryKeyFor = location =>
+    `assetSourceRegistry:${location}`;
 
 function getAssetSourceRegistry() {
     if ( assetSourceRegistryPromise === undefined ) {
+        const location = µb.assetsBootstrapLocation || µb.assetsJsonPath;
+        assetSourceRegistryKey = assetSourceRegistryKeyFor(location);
         assetSourceRegistryPromise = cacheStorage.get(
-            'assetSourceRegistry' + (µb.assetsBootstrapLocation ?? '')
+            assetSourceRegistryKey
         ).then(bin => {
             if ( bin instanceof Object ) {
-                if ( bin.assetSourceRegistry instanceof Object ) {
-                    assetSourceRegistry = bin.assetSourceRegistry;
+                if ( bin[assetSourceRegistryKey] instanceof Object ) {
+                    assetSourceRegistry = bin[assetSourceRegistryKey];
                     ubolog('Loaded assetSourceRegistry');
                     return assetSourceRegistry;
                 }
             }
-            return assets.fetchText(
-                µb.assetsBootstrapLocation || µb.assetsJsonPath
-            ).then(details => {
-                return details.content !== ''
-                    ? details
-                    : assets.fetchText(µb.assetsJsonPath);
+            // Unkeyed registry of older versions, from any location
+            cacheStorage.remove('assetSourceRegistry');
+            return assets.fetchText(location).then(details => {
+                if ( details.content !== '' ) { return details; }
+                assetSourceRegistryKey =
+                    assetSourceRegistryKeyFor(µb.assetsJsonPath);
+                return assets.fetchText(µb.assetsJsonPath);
             }).then(details => {
                 updateAssetSourceRegistry(details.content, true);
                 ubolog('Loaded assetSourceRegistry');
@@ -592,7 +599,7 @@ function unregisterAssetSource(assetKey) {
 const saveAssetSourceRegistry = (( ) => {
     const save = ( ) => {
         timer.off();
-        cacheStorage.set({ assetSourceRegistry });
+        cacheStorage.set({ [assetSourceRegistryKey]: assetSourceRegistry });
     };
     const timer = vAPI.defer.create(save);
     return function(lazily) {
