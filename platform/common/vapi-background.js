@@ -1454,6 +1454,9 @@ vAPI.adminStorage = (( ) => {
             get: function() {
                 return Promise.resolve();
             },
+            getUncached: function() {
+                return Promise.resolve();
+            },
         };
     }
     const cacheManagedStorage = async ( ) => {
@@ -1497,7 +1500,15 @@ vAPI.adminStorage = (( ) => {
                 out[k] = bin[k] !== undefined ? bin[k] : v;
             }
             return out;
-        }
+        },
+        getUncached: async function(key) {
+            let bin;
+            try {
+                bin = await webext.storage.managed.get(key);
+            } catch {
+            }
+            return bin instanceof Object ? bin[key] : undefined;
+        },
     };
 })();
 
