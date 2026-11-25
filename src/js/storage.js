@@ -522,9 +522,7 @@ onBroadcast(msg => {
 // - When run on startup, it compares a stored snapshot (lastDefaultListset)
 //   to the current defaults from assets.json and enables newly added defaults
 //   to avoid overriding user choices.
-// - For pre-1.69 upgrades with no snapshot, it snapshots the previously
-//   selected defaults and force-enables required Helium filters once.
-µb.reconcileDefaultListset = async function(bootstrap) {
+µb.reconcileDefaultListset = async function() {
     const bin = await vAPI.storage.get('lastDefaultListset');
     const lastDefaultListset =
         bin instanceof Object ? bin.lastDefaultListset : undefined;
@@ -559,27 +557,6 @@ onBroadcast(msg => {
             lastSet,
             false
         );
-    } else if ( bootstrap ) {
-        // Force-enable Helium filters for botched pre-1.69 upgrades.
-        // TODO: remove once most users have upgraded past 1.69.
-        const selectedListset = new Set(this.selectedFilterLists);
-        let selectedListModified = false;
-
-        for ( const assetKey of [ 'helium-annoyances', 'helium-unbreak' ] ) {
-            const entry = assets[assetKey];
-            if ( entry === undefined || entry.content !== 'filters' ) {
-                continue;
-            }
-            if ( selectedListset.has(assetKey) ) {
-                continue;
-            }
-            selectedListset.add(assetKey);
-            selectedListModified = true;
-        }
-
-        if ( selectedListModified ) {
-            this.saveSelectedFilterLists(Array.from(selectedListset));
-        }
     }
 
     // Persist snapshot for future default listset upgrades.
