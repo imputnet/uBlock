@@ -1,3 +1,11 @@
+- [[regression] Restore behavior of injecting content scripts at launch](https://github.com/gorhill/uBlock/commit/d793535453)
+- [[regression] Use JSON.stringify() to eliminate undefined values](https://github.com/gorhill/uBlock/commit/75a94edb58)
+- [[shim] Fix recursion in optimizely.js url-change wrapper](https://github.com/gorhill/uBlock/commit/72421a192f) by @ryanbr
+
+----------
+
+# 1.77.0
+
 - [[security] Disallow non-HTTP URLs in click2load resource](https://github.com/gorhill/uBlock/commit/5934db2a04)
 - [Fix text color of code in `prevent-clipboard-write` scriptlet](https://github.com/gorhill/uBlock/commit/e1aa62030d)
 - [[regression] Fix broken DOM inspector](https://github.com/gorhill/uBlock/commit/3028a92bdb)
